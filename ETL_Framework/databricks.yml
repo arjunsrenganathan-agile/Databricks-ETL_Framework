@@ -1,4 +1,3 @@
-%yaml
 # This is a Databricks asset bundle definition for ETL_Framework.
 # See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
 bundle:

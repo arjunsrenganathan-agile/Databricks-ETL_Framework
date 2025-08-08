@@ -17,11 +17,12 @@ def get_spark() -> SparkSession:
         return SparkSession.builder.getOrCreate()
 
 def create_catalog(spark: SparkSession, catalog_name: str):
-    spark.sql(f"CREATE CATALOG IF NOT EXISTS my_test_catalog")
+    spark.sql(f"CREATE CATALOG IF NOT EXISTS {catalog_name}")
     print(f"Catalog {catalog_name} created successfully.")
 
 def main():
     get_taxis(get_spark()).show(5)
+    create_catalog(spark, "my_catalog")
 
 
 if __name__ == "__main__":
