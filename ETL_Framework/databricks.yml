@@ -1,3 +1,4 @@
+%yaml
 # This is a Databricks asset bundle definition for ETL_Framework.
 # See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
 bundle:
@@ -13,6 +14,20 @@ include:
   - resources/*.yml
   - resources/*/*.yml
 
+sync:
+  include:
+    - src/**/*.py
+    - src/**/*.ipynb
+  
+resources:
+     jobs:
+       create-catalog-job:
+         name: create-catalog-job
+         tasks:
+           - task_key: create-catalog-task
+             existing_cluster_id: 13b12279f0ff1588
+             spark_python_task:
+               python_file: src/create_catalog.py
 targets:
   dev:
     # The default target uses 'mode: development' to create a development copy.
