@@ -5,9 +5,6 @@ def get_taxis(spark: SparkSession) -> DataFrame:
     return spark.read.table("samples.nyctaxi.trips")
 
 
-# Create a new Databricks Connect session. If this fails,
-# check that you have configured Databricks Connect correctly.
-# See https://docs.databricks.com/dev-tools/databricks-connect.html.
 def get_spark() -> SparkSession:
     try:
         from databricks.connect import DatabricksSession
@@ -21,7 +18,8 @@ def create_catalog(spark: SparkSession, catalog_name: str):
     print(f"Catalog {catalog_name} created successfully.")
 
 def main():
-    get_taxis(get_spark()).show(5)
+    spark = get_spark()
+    get_taxis(spark).show(5)
     create_catalog(spark, "my_catalog")
 
 
