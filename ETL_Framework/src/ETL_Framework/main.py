@@ -16,6 +16,9 @@ def get_spark() -> SparkSession:
     except ImportError:
         return SparkSession.builder.getOrCreate()
 
+def create_catalog(spark: SparkSession, catalog_name: str):
+    spark.sql(f"CREATE CATALOG IF NOT EXISTS my_test_catalog")
+    print(f"Catalog {catalog_name} created successfully.")
 
 def main():
     get_taxis(get_spark()).show(5)
