@@ -1,0 +1,14 @@
+# The main pipeline for ETL_Framework
+resources:
+  pipelines:
+    ETL_Framework_pipeline:
+      name: ETL_Framework_pipeline
+      catalog: workspace
+      schema: ETL_Framework_${bundle.target}
+      serverless: true
+      libraries:
+        - notebook:
+            path: ../src/dlt_pipeline.ipynb
+
+      configuration:
+        bundle.sourcePath: ${workspace.file_path}/src
