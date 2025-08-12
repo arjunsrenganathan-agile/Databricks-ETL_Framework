@@ -35,4 +35,4 @@ jobs:
       - name: Deploy Asset Bundle
         run: |
           # Adjust the path below to the location of your asset bundle in the repo
-          databricks workspace import_dir ./path/to/your/asset_bundle /path/in/databricks
+          databricks workspace import_dir ./ETL_Framework/databricks.yml
