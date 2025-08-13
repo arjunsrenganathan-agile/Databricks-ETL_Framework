@@ -27,12 +27,12 @@ jobs:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          databricks configure --token <<EOF
-          $DATABRICKS_HOST
-          $DATABRICKS_TOKEN
-          EOF
+          echo "$DATABRICKS_HOST" > ~/.databrickscfg
+          echo "token = $DATABRICKS_TOKEN" >> ~/.databrickscfg
 
       - name: Deploy Asset Bundle
         run: |
-          # Adjust the path below to the location of your asset bundle in the repo
-          databricks workspace import_dir ./ETL_Framework/databricks.yml
+          # Adjust the paths below
+          SOURCE_PATH="./ETL_Framework/databricks"  # Adjust this to your asset bundle source directory
+          TARGET_PATH="//Workspace/Users/arjun.shankar@agile-analytics.com.au/ETL_Framework"  # Specify the target path in Databricks workspace
+          databricks workspace import_dir "$SOURCE_PATH" "$TARGET_PATH"
