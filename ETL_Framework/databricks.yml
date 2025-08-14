@@ -4,10 +4,29 @@ bundle:
   name: ETL_Framework
   uuid: 79b60fd7-1d4a-4c57-8b92-26ea02b5a08b
 
+variables:
+  # Add variables if your resources need them
+  catalog:
+    description: "Unity Catalog name"
+    default: "dev_catalog"
+  schema:
+    description: "Database schema name"
+    default: "etl_framework"
+  warehouse_id:
+    description: "SQL Warehouse ID for jobs"
+    default: "your-dev-warehouse-id"
+  cluster_policy_id:
+    description: "Cluster policy for jobs"
+    default: "0000000000000000"
+  notification_email:
+    description: "Email for job notifications"
+    default: "arjun.shankar@agile-analytics.com.au"
+
 artifacts:
   python_artifact:
     type: whl
     build: uv build --wheel
+    path: .
 
 include:
   - resources/*.yml
@@ -17,6 +36,13 @@ sync:
   include:
     - src/**/*.py
     - src/**/*.ipynb
+    - tests/**/*.py      # Include tests
+    - conf/**/*.yaml     # Include config files
+  exclude:
+    - "**/__pycache__/**"
+    - "**/.pytest_cache/**"
+    - "**/.*"
+    - "**/*.pyc"
   
 targets:
   dev:
@@ -28,4 +54,23 @@ targets:
     default: true
     workspace:
       host: https://dbc-117038dd-c0fe.cloud.databricks.com
-      root_path: /Workspace/Users/arjun.shankar@agile-analytics.com.au/ETL_Framework/${bundle.target}
+      # CHANGED: Deploy to shared workspace instead of personal workspace
+      root_path: /Workspace/Shared/ETL_Framework/${bundle.target}
+    variables:
+      catalog: "dev_catalog"
+      schema: "etl_framework_dev" 
+      warehouse_id: "your-dev-warehouse-id"
+    permissions:
+      - user_name: arjun.shankar@agile-analytics.com.au
+        level: CAN_MANAGE
+      # Add team members as needed:
+      # - user_name: teammate@agile-analytics.com.au
+      #   level: CAN_RUN
+
+# Add presets for consistent tagging
+presets:
+  tags:
+    Environment: "${bundle.target}"
+    Project: "ETL_Framework"
+    Owner: "arjun.shankar@agile-analytics.com.au"
+    Team: "Data Engineering"
