@@ -21,7 +21,7 @@ jobs:
           databricks configure --host "$DATABRICKS_HOST" --token "$DATABRICKS_TOKEN"
           
       - name: Validate Asset Bundle
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/ETL_Framework
         run: |
           echo "Current directory: $(pwd)"
           echo "Files present:"
@@ -30,13 +30,11 @@ jobs:
             echo "✓ Found databricks.yml"
             databricks bundle validate
           else
-            echo "✗ databricks.yml not found, trying alternative approaches..."
-            # Try to find the file
-            find . -name "databricks.yml" -exec echo "Found at: {}" \;
+            echo "✗ databricks.yml still not found"
             exit 1
           fi
           
       - name: Deploy Asset Bundle
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/ETL_Framework
         run: |
           databricks bundle deploy --target prod
