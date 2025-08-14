@@ -1,38 +1,32 @@
 name: Deploy Databricks Asset Bundle    
-
 on:
   push:
     branches:
       - main  # Change this to the branch you want to trigger the deployment
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'  # Specify your Python version
-
       - name: Install Databricks CLI
         run: |
           pip install databricks-cli
-
       - name: Configure Databricks CLI
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          echo "$DATABRICKS_HOST" > ~/.databrickscfg
+          echo "[DEFAULT]" > ~/.databrickscfg
+          echo "host = $DATABRICKS_HOST" >> ~/.databrickscfg
           echo "token = $DATABRICKS_TOKEN" >> ~/.databrickscfg
-
       - name: Deploy Asset Bundle
         run: |
           # Adjust the paths below
           SOURCE_PATH="./ETL_Framework/databricks"  # Adjust this to your asset bundle source directory
-          TARGET_PATH="//Workspace/Users/arjun.shankar@agile-analytics.com.au/ETL_Framework"  # Specify the target path in Databricks workspace
+          TARGET_PATH="/Workspace/Users/arjun.shankar@agile-analytics.com.au/ETL_Framework"  # Specify the target path in Databricks workspace
           databricks workspace import_dir "$SOURCE_PATH" "$TARGET_PATH"
