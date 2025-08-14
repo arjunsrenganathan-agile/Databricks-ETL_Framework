@@ -10,23 +10,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          
-      - name: Install Databricks CLI
-        run: |
-          pip install databricks-cli
-          
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@main
+        
       - name: Configure Databricks CLI
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          echo "[DEFAULT]" > ~/.databrickscfg
-          echo "host = $DATABRICKS_HOST" >> ~/.databrickscfg
-          echo "token = $DATABRICKS_TOKEN" >> ~/.databrickscfg
+          databricks configure --host "$DATABRICKS_HOST" --token "$DATABRICKS_TOKEN"
           
       - name: Validate Asset Bundle
         run: |
@@ -36,8 +28,4 @@ jobs:
       - name: Deploy Asset Bundle
         run: |
           echo "Deploying Databricks Asset Bundle..."
-          # Deploy to production target - adjust the target name based on your databricks.yml configuration
           databricks bundle deploy --target prod
-          
-          # Alternative: if you don't have a prod target defined, you can deploy without specifying target
-          # databricks bundle deploy
