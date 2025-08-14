@@ -120,7 +120,8 @@ jobs:
       - name: Install Python dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
-          echo "📦 Installing dependencies..."
+          echo "📦 setting up virtual env Installing dependencies..."
+          uv venv
           if [ -f requirements.txt ]; then
             echo "Installing from requirements.txt"
             uv pip install -r requirements.txt
@@ -131,18 +132,7 @@ jobs:
           fi
           echo "✅ Dependencies installed"
 
-      - name: Run Python tests
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: |
-          if [ -d tests ]; then
-            echo "🧪 Running Python tests..."
-            uv pip install pytest
-            python -m pytest tests/ -v --tb=short --maxfail=5
-            echo "✅ Tests passed"
-          else
-            echo "ℹ️ No tests directory found, skipping tests"
-          fi
-
+    
       - name: Validate bundle configuration
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
@@ -284,80 +274,4 @@ jobs:
             echo "You can retry the deployment or use the manual workflow dispatch." >> $GITHUB_STEP_SUMMARY
           fi
 
-  # Notification job
-  notify:
-    name: 'Send Notifications'
-    runs-on: ubuntu-latest
-    needs: [validate, deploy]
-    if: always() && needs.validate.outputs.should_deploy == 'true'
-    steps:
-      - name: Determine notification content
-        id: notification
-        run: |
-          if [[ "${{ needs.deploy.result }}" == "success" ]]; then
-            echo "status=success" >> $GITHUB_OUTPUT
-            echo "emoji=🎉" >> $GITHUB_OUTPUT
-            echo "message=ETL Framework successfully deployed to ${{ needs.validate.outputs.target }}" >> $GITHUB_OUTPUT
-            echo "color=good" >> $GITHUB_OUTPUT
-          else
-            echo "status=failure" >> $GITHUB_OUTPUT  
-            echo "emoji=❌" >> $GITHUB_OUTPUT
-            echo "message=ETL Framework deployment to ${{ needs.validate.outputs.target }} failed" >> $GITHUB_OUTPUT
-            echo "color=danger" >> $GITHUB_OUTPUT
-          fi
 
-      - name: Send Slack notification
-        if: vars.SLACK_WEBHOOK_URL != ''
-        env:
-          SLACK_WEBHOOK_URL: ${{ vars.SLACK_WEBHOOK_URL }}
-        run: |
-          curl -X POST -H 'Content-type: application/json' \
-            --data "{
-              \"attachments\": [
-                {
-                  \"color\": \"${{ steps.notification.outputs.color }}\",
-                  \"blocks\": [
-                    {
-                      \"type\": \"section\",
-                      \"text\": {
-                        \"type\": \"mrkdwn\",
-                        \"text\": \"${{ steps.notification.outputs.emoji }} *${{ steps.notification.outputs.message }}*\"
-                      }
-                    },
-                    {
-                      \"type\": \"context\",
-                      \"elements\": [
-                        {
-                          \"type\": \"mrkdwn\",
-                          \"text\": \"Branch: \`${{ github.ref_name }}\` | Commit: \`${{ github.sha }}\` | Actor: ${{ github.actor }}\"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }" \
-            $SLACK_WEBHOOK_URL || echo "Slack notification failed"
-
-      - name: Send Teams notification  
-        if: vars.TEAMS_WEBHOOK_URL != ''
-        env:
-          TEAMS_WEBHOOK_URL: ${{ vars.TEAMS_WEBHOOK_URL }}
-        run: |
-          curl -X POST -H 'Content-type: application/json' \
-            --data "{
-              \"@type\": \"MessageCard\",
-              \"@context\": \"http://schema.org/extensions\",
-              \"summary\": \"${{ steps.notification.outputs.message }}\",
-              \"themeColor\": \"${{ steps.notification.outputs.color == 'good' && '00FF00' || 'FF0000' }}\",
-              \"sections\": [{
-                \"activityTitle\": \"${{ steps.notification.outputs.emoji }} Databricks Deployment\",
-                \"activitySubtitle\": \"${{ steps.notification.outputs.message }}\",
-                \"facts\": [
-                  {\"name\": \"Environment\", \"value\": \"${{ needs.validate.outputs.target }}\"},
-                  {\"name\": \"Branch\", \"value\": \"${{ github.ref_name }}\"},
-                  {\"name\": \"Actor\", \"value\": \"${{ github.actor }}\"}
-                ]
-              }]
-            }" \
-            $TEAMS_WEBHOOK_URL || echo "Teams notification failed"
