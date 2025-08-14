@@ -10,6 +10,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Install UV
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          
       - name: Setup Databricks CLI
         uses: databricks/setup-cli@main
         
@@ -24,15 +34,10 @@ jobs:
         working-directory: ${{ github.workspace }}/ETL_Framework
         run: |
           echo "Current directory: $(pwd)"
-          echo "Files present:"
-          ls -la
-          if [ -f "databricks.yml" ]; then
-            echo "✓ Found databricks.yml"
-            databricks bundle validate
-          else
-            echo "✗ databricks.yml still not found"
-            exit 1
-          fi
+          echo "Checking UV installation:"
+          uv --version
+          echo "✓ Found databricks.yml, validating..."
+          databricks bundle validate
           
       - name: Deploy Asset Bundle
         working-directory: ${{ github.workspace }}/ETL_Framework
