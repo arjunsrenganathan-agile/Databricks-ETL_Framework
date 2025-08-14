@@ -1,21 +1,24 @@
 name: Deploy Databricks Asset Bundle    
-on: 
+on:
   push:
     branches:
-      - main  # Change this to the branch you want to trigger the deployment
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.8'  # Specify your Python version
+          python-version: '3.9'
+          
       - name: Install Databricks CLI
         run: |
           pip install databricks-cli
+          
       - name: Configure Databricks CLI
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
@@ -24,9 +27,17 @@ jobs:
           echo "[DEFAULT]" > ~/.databrickscfg
           echo "host = $DATABRICKS_HOST" >> ~/.databrickscfg
           echo "token = $DATABRICKS_TOKEN" >> ~/.databrickscfg
+          
+      - name: Validate Asset Bundle
+        run: |
+          echo "Validating Databricks Asset Bundle..."
+          databricks bundle validate
+          
       - name: Deploy Asset Bundle
         run: |
-          # Adjust the paths below
-          SOURCE_PATH="./ETL_Framework"  # Adjust this to your asset bundle source directory
-          TARGET_PATH="/Workspace/Users/arjun.shankar@agile-analytics.com.au/ETL_Framework"  # Specify the target path in Databricks workspace
-          databricks workspace import_dir "$SOURCE_PATH" "$TARGET_PATH"
+          echo "Deploying Databricks Asset Bundle..."
+          # Deploy to production target - adjust the target name based on your databricks.yml configuration
+          databricks bundle deploy --target prod
+          
+          # Alternative: if you don't have a prod target defined, you can deploy without specifying target
+          # databricks bundle deploy
