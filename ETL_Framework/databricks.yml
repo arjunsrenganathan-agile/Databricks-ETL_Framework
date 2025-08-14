@@ -28,3 +28,4 @@ targets:
     default: true
     workspace:
       host: https://dbc-117038dd-c0fe.cloud.databricks.com
+      root_path: /Workspace/Users/arjun.shankar@agile-analytics.com.au/ETL_Framework/${bundle.target}
