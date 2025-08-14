@@ -1,59 +1,137 @@
 # This is a Databricks asset bundle definition for ETL_Framework.
 # See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+
 bundle:
   name: ETL_Framework
   uuid: 79b60fd7-1d4a-4c57-8b92-26ea02b5a08b
+
+variables:
+  # Environment-specific variables
+  catalog:
+    description: "Unity Catalog name"
+    default: "dev_catalog"
+  schema:
+    description: "Database schema name"
+    default: "etl_framework"
+  warehouse_id:
+    description: "SQL Warehouse ID for jobs"
+    default: "your-dev-warehouse-id"
+  cluster_policy_id:
+    description: "Cluster policy for jobs"
+    default: null
+  notification_email:
+    description: "Email for job notifications"
+    default: "arjun.shankar@agile-analytics.com.au"
 
 artifacts:
   python_artifact:
     type: whl
     build: uv build --wheel
+    path: .
 
 include:
   - resources/*.yml
   - resources/*/*.yml
 
 sync:
+  # Include source code and notebooks
   include:
     - src/**/*.py
     - src/**/*.ipynb
-  
+    - tests/**/*.py  # Include tests for validation
+    - conf/**/*.yaml  # Include configuration files
+  # Exclude files that shouldn't be synced
+  exclude:
+    - "**/__pycache__/**"
+    - "**/.pytest_cache/**"
+    - "**/.*"
+    - "**/*.pyc"
+
 targets:
   dev:
-    # The default target uses 'mode: development' to create a development copy.
-    # - Deployed resources get prefixed with '[dev my_user_name]'
-    # - Any job schedules and triggers are paused by default.
-    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: development
     default: true
     workspace:
       host: https://dbc-117038dd-c0fe.cloud.databricks.com
+      root_path: /Workspace/Users/arjun.shankar@agile-analytics.com.au/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: "dev_catalog"
+      schema: "etl_framework_dev"
+      warehouse_id: "your-dev-warehouse-id"
+    permissions:
+      - user_name: arjun.shankar@agile-analytics.com.au
+        level: CAN_MANAGE
 
   sit:
-    # The default target uses 'mode: development' to create a development copy.
-    # - Deployed resources get prefixed with '[dev my_user_name]'
-    # - Any job schedules and triggers are paused by default.
-    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: production
     workspace:
       host: https://dbc-117038dd-c0fe.cloud.databricks.com
+      root_path: /Shared/ETL_Framework/sit  # Use shared location for non-dev environments
+    variables:
+      catalog: "sit_catalog"
+      schema: "etl_framework_sit"
+      warehouse_id: "your-sit-warehouse-id"
+    permissions:
+      - user_name: arjun.shankar@agile-analytics.com.au
+        level: CAN_MANAGE
+      # Add team permissions
+      - group_name: data_engineers
+        level: CAN_RUN
+      - group_name: data_analysts
+        level: CAN_VIEW
 
   uat:
-    # The default target uses 'mode: development' to create a development copy.
-    # - Deployed resources get prefixed with '[dev my_user_name]'
-    # - Any job schedules and triggers are paused by default.
-    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: production
     workspace:
       host: https://dbc-117038dd-c0fe.cloud.databricks.com
-
+      root_path: /Shared/ETL_Framework/uat
+    variables:
+      catalog: "uat_catalog"
+      schema: "etl_framework_uat"
+      warehouse_id: "your-uat-warehouse-id"
+    permissions:
+      - user_name: arjun.shankar@agile-analytics.com.au
+        level: CAN_MANAGE
+      - group_name: data_engineers
+        level: CAN_RUN
+      - group_name: qa_team
+        level: CAN_RUN
+      - group_name: business_users
+        level: CAN_VIEW
 
   prod:
     mode: production
     workspace:
       host: https://dbc-117038dd-c0fe.cloud.databricks.com
-      # We explicitly deploy to /Workspace/Users/arjun.shankar@agile-analytics.com.au to make sure we only have a single copy.
-      root_path: /Workspace/Users/arjun.shankar@agile-analytics.com.au/.bundle/${bundle.name}/${bundle.target}
+      root_path: /Shared/ETL_Framework/prod  # Production in shared location
+    variables:
+      catalog: "prod_catalog"
+      schema: "etl_framework"
+      warehouse_id: "your-prod-warehouse-id"
+      cluster_policy_id: "your-prod-cluster-policy-id"
     permissions:
+      # Production access control
       - user_name: arjun.shankar@agile-analytics.com.au
         level: CAN_MANAGE
+      - group_name: data_engineers
+        level: CAN_RUN
+      - group_name: data_platform_admins
+        level: CAN_MANAGE
+      - group_name: business_users
+        level: CAN_VIEW
+    # Production-specific settings
+    run_as:
+      service_principal_name: "your-service-principal@agile-analytics.com.au"
+    
+# Global presets for all targets
+presets:
+  # Common tags for all resources
+  tags:
+    - key: "Environment"
+      value: "${bundle.target}"
+    - key: "Project"
+      value: "ETL_Framework"
+    - key: "Owner"
+      value: "arjun.shankar@agile-analytics.com.au"
+    - key: "Team"
+      value: "Data Engineering"
