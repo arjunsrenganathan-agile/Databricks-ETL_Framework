@@ -54,8 +54,8 @@ targets:
     default: true
     workspace:
       host: https://dbc-117038dd-c0fe.cloud.databricks.com
-      # CHANGED: Deploy to shared workspace instead of personal workspace
-      root_path: /Workspace/Shared/ETL_Framework/${bundle.target}
+      # OPTION 1: Keep development mode safe - includes username
+      root_path: /Workspace/Shared/ETL_Framework/${bundle.target}/${workspace.current_user.short_name}
     variables:
       catalog: "dev_catalog"
       schema: "etl_framework_dev" 
