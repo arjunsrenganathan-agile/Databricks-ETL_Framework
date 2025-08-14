@@ -183,12 +183,12 @@ jobs:
           
           # Deploy with appropriate flags
           if [[ "${{ github.event.inputs.force_deploy }}" == "true" ]]; then
-            databricks bundle destroy --target dev
-            databricks bundle deploy --target dev --force  # 👈 HARDCODED TO 'dev'
+            databricks bundle destroy --target dev --auto-approve
+            databricks bundle deploy --target dev --force --auto-approve # 👈 HARDCODED TO 'dev'
             echo "⚠️ Force deployment completed"
           else
-            databricks bundle destroy --target dev
-            databricks bundle deploy --target dev  # 👈 HARDCODED TO 'dev'
+            databricks bundle destroy --target dev --auto-approve
+            databricks bundle deploy --target dev --auto-approve # 👈 HARDCODED TO 'dev'
             echo "✅ Standard deployment completed"
           fi
           
