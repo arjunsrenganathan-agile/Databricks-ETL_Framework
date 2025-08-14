@@ -27,6 +27,6 @@ jobs:
       - name: Deploy Asset Bundle
         run: |
           # Adjust the paths below
-          SOURCE_PATH="./ETL_Framework/databricks"  # Adjust this to your asset bundle source directory
+          SOURCE_PATH="./ETL_Framework"  # Adjust this to your asset bundle source directory
           TARGET_PATH="/Workspace/Users/arjun.shankar@agile-analytics.com.au/ETL_Framework"  # Specify the target path in Databricks workspace
           databricks workspace import_dir "$SOURCE_PATH" "$TARGET_PATH"
