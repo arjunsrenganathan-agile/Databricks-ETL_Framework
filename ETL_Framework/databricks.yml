@@ -2,7 +2,7 @@
 # See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
 bundle:
   name: ETL_Framework
-  uuid: 79b60fd7-1d4a-4c57-8b92-26ea02b5a08b
+  uuid: 79b60fd7-1d4a-4c57-8b92-26ea02b5a08b 
 
 variables:
   # Add variables if your resources need them
